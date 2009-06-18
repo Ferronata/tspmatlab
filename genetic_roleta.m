@@ -1,4 +1,4 @@
-function pop = genetic_torneio(ops, num_iter, pop_size)
+function pop = genetic_roleta(ops, num_iter, pop_size)
 	ops.max_pop_size = 2 * pop_size;
 	pop = ops.gen_pop_new(pop_size);
 	
@@ -37,6 +37,7 @@ function pop = genetic_torneio(ops, num_iter, pop_size)
 	save 'genetic_bests.txt' bests;
 	save 'genetic_averages.txt' averages;
 	best = pop{1,size(pop,2)};
+    best
 	save 'genetic_bestgen.txt' best;
 	save 'genetic_params.txt' ops;
 end 
@@ -53,68 +54,51 @@ function [pop, best, average] = sortpop(pop)
 	average = sum(s) / l;
 end
 
+% runs the roleta n times; assumes fits >= 0
+function ci = roleta(fits, n)
+    fits = 1./-fits;
+	cs = cumsum(fits);
+	scale = cs(size(fits,2));
+	ci = [];
+	for i = [1:n]
+		r = rand()*scale;
+		ci(i) = find(cs >= r, 1);
+	end;
+end
+
 function [pop, best, average] = genstep(pop, ops)
-	[pop, best, average] = sortpop(pop);
-	l = size(pop,2);
-
-	% seleciona por torneio 
-	isels = [];
-
-	numsel = l/3;
-
-	for i = 1:numsel
-		% escolhe dois individuos para competir 
-		i1 = ceil(rand()*l);
-		i2 = ceil(rand()*l);
-		% qual tem maior fitness?
-		f1 = pop{2,i1};
-		f2 = pop{2,i2};
-		if (f1 > f2)
-			imax = i1;
-		else
-			imax = i2;
-		end;
-
-		isels = [isels imax];
-	end
-
-	% nova populacao
-	pop2 = cell(0);
-
-	for i = 1:l/2
-		% escolhe 2 individuos quaisquer entre os escolhidos
-		i1 = ceil(rand()*length(isels));
-		i2 = ceil(rand()*length(isels));
-		isel1 = isels(i1);
-		isel2 = isels(i2);
+	% selects the parents 
+    len = size(pop, 2);
+	fits = cell2mat(pop(2,:));
+	isel = roleta(fits, 2*len);
+	% performs the recombinations
+	for i = 1:len
+		% the parents x and y
+        isel1 = isel(2*i - 1);
+		isel2 = isel(2*i);
 		ind1 = pop{1,isel1};
 		ind2 = pop{1,isel2};
-		fit1 = pop{2,isel1};
-		fit2 = pop{2,isel2};
-		% crossover com probabilidade
-		if (rand() < ops.combine_rate)
-			ind1 = ops.gen_combine(ind1, ind2);
-			ind2 = ops.gen_combine(ind2, ind1);
-			fit1 = ops.gen_fitness(ind1);
-			fit2 = ops.gen_fitness(ind2);
-		end
-		% mutacao com probabilidade
-		if (rand() < ops.mutate_rate)
-			ind1 = ops.gen_mutate(ind1);
-			fit1 = ops.gen_fitness(ind1);
-		end
-		if (rand() < ops.mutate_rate)
-			ind2 = ops.gen_mutate(ind2);
-			fit2 = ops.gen_fitness(ind2);
-		end
-		% acrescenta os individuos na nova pop
-		pop2{1,2*i-1} = ind1;
-		pop2{2,2*i-1} = fit1;
-		pop2{1,2*i} = ind2;
-		pop2{2,2*i} = fit2;
-	end
+		% reproduce, creating offsprings x2,y2
+		x2 = ops.gen_combine(ind1, ind2);
+        y2 = ops.gen_combine(ind2, ind1);
+		% mutate the offspring
+		x2 = ops.gen_mutate(x2);
+		y2 = ops.gen_mutate(y2);
+		% calculates the new fitnes
+		fx = ops.gen_fitness(x2);
+		fy = ops.gen_fitness(y2);
+		% competition
+		ix = find(fits < fx, 1);
+		iy = find(fits < fy, 1);
+		% reinsert into the right position
+		pop(2,ix) = {fx};
+		pop(1,ix) = {x2};
+		pop(2,iy) = {fy};
+		pop(1,iy) = {y2};
+	end;
 
-	pop = pop2;
+	% recalculates the population 
+	[pop, best, average] = sortpop(pop);
 end
 
 function pop = fitnesses(pop,ops)
@@ -125,12 +109,10 @@ function r = random_low(n, maxx)
 	r  = rand(1,n);
 	r = floor((r .* r) .* (maxx-1) + 1);
 end
-
 function r = random_hi(n, maxx)
 	r = rand(1,n);
 	r = floor((1 - r .* r) .* (maxx-1) + 1);
 end
-
 function r = random_lin(n, nax)
 	r = rand(1,n);
 	r = floor(r .* (max - 1) + 1);
