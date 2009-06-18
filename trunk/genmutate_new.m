@@ -1,4 +1,4 @@
-function a = genmutate2(a)
+function a = genmutate_new(a)
 	global params;
 	n = size(a,2);
 	k = ceil(rand()*3);
