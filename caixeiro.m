@@ -11,7 +11,7 @@ end
 
 function caixeiro_genetic(dist)
 	ops.gen_pop_new= @genpopnew;
-	ops.gen_mutate = @genmutate;
+	ops.gen_mutate = @genmutate_new;
 	ops.gen_combine = @gencombine;
 	ops.gen_fitness = @fitness;
 	ops.gen_localsearch = @gennullsearch;
@@ -21,7 +21,7 @@ function caixeiro_genetic(dist)
 	pop = genetic_torneio(ops, 500, 40);
 
 	figure;
-	drawtrip(pop{1,size(pop,2)});
+	drawtrip(pop{1,size(pop,2)}, 'best found');
 	print('genetic_caixeiro_best.eps');
 end;
 
