@@ -18,12 +18,12 @@ function caixeiro_genetic(dist)
 	ops.combine_rate = 0.1;
 	ops.mutate_rate = 0.1;
 
-	pop = genetic_torneio(ops, 500, 40);
+	pop = genetic_roleta(ops, 1000, 40);
 
 	figure;
 	drawtrip(pop{1,size(pop,2)}, 'best found');
 	print('genetic_caixeiro_best.eps');
-end;
+end
 
 function dist = calcul_dist(ct)
 	l = size(ct, 1);
@@ -32,13 +32,13 @@ function dist = calcul_dist(ct)
 			dist(c1,c2) = sqrt((ct(c1,2) - ct(c2,2))^2 + (ct(c1,3)-ct(c2,3))^2);
 		end
 	end
-end;
+end
 
 function a = genpopnew(quant)
 	global params;
 	a = cell(0);
 	for i = [1:quant]
-		a(i) = randperm(params.len);
+		a{i} = randperm(params.len);
 	end;
 end
 
@@ -59,51 +59,6 @@ function a = genmutate(a)
 	a(mutb) = v;
 end
 
-function a = genmutate2(a)
-	global params;
-	sz = size(a,2);
-	i = ceil(rand()*sz);
-
-
-
-	iant = i - 1;
-	if (iant <= 0)
-		iant = sz;
-	end
-	inex = i + 1;
-	if (inex > sz)
-		inex = 1;
-	end
-
-	v = a(i);
-
-
-	idist = setdiff([1:sz], [iant i inex]);
-	idist_ant = idist - 1;
-	idist_ant(1) = sz;
-	idist_nex = idist + 1;
-	idist_nex(sz-3) = 1;
-
-	d = params.dist(a(inex), a(idist)) + \
-	    params.dist(a(iant), a(idist)) + \
-	    params.dist(v, a(idist_ant)) + \
-	    params.dist(v, a(idist_nex));
-	prob = (1./d).^10;
-	%[x xi  ] = max(prob);
-	%i2 = xi;
-	i2 = roleta(prob);
-
-	id = idist(i2);
-
-	a(i) = a(id);
-	a(id) = v;
-end
-
-function ci = roleta(probs)
-	cs = cumsum(probs);
-	r = rand()*cs(size(probs,2));
-	ci = find(cumsum(probs) > r, 1);
-end
 
 function a = rem_repeated(a) 
 	h = hist(a, 1:length(a));
@@ -147,21 +102,4 @@ function f = fitness(a)
 end
 
 function a = gennullsearch(a)
-end
-
-function a = genlocalsearch(a)
-	global params;
-	cmp = 1;
-	d = sum(params.nums.*a) - sum(params.nums.*not(a));
-
-	for i = [params.len:-1:1]
-		cmp = (cmp == (d > 0)); % xor
-		d = abs(d);
-
-		v = params.nums(i);
-		if ((a(i) == cmp) && (abs(d - 2*v) < d))
-			a(i) = 1 - cmp;
-			d = d - 2*v;
-		end;
-	end;
 end
