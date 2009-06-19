@@ -9,4 +9,5 @@ function drawbest
 	trip
 	
 	drawtrip(trip, 'optimal trip');
+	print('optimal_trip.eps');
 end

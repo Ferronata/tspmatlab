@@ -18,7 +18,7 @@ function caixeiro_genetic(dist)
 	ops.combine_rate = 0.1;
 	ops.mutate_rate = 0.1;
 
-	pop = genetic_roleta(ops, 1000, 40);
+	pop = genetic_roleta(ops, 20, 40);
 
 	figure;
 	drawtrip(pop{1,size(pop,2)}, 'best found');
