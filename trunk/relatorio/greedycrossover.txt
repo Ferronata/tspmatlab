@@ -1,0 +1,23 @@
+O operador de crossover guloso implementado funciona da seguinte forma:
+
+CROSSOVER-GULOSO(P1, P2)
+Entrada: pais P1 e P2
+Saída: filho F
+01 F <- []
+02 v <- Vértice-Aleatório(P1)
+03 Adiciona(F, v)
+04 Enquanto Tam(F) < Tam(P1)
+05     u1 <- prox(P1, v)
+06     u2 <- prox(P2, v)
+07     umin <- arg(min(dist(v,u))) u = {u1, u2}
+08     umax <- arg(max(dist(v, u))) u = {u1, u2}
+09     Se umin não pertence a F
+10         v <- umin
+11     Senão se umax não pertence a F
+12         v <- umax
+13     Senão
+14         L <- P1 - F
+15         u3 <- arg(min(dist(v, L)))
+16         v <- u3
+17     Adiciona(F, v)
+18 Retorna F
