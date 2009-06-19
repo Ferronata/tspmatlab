@@ -16,8 +16,15 @@ Saída: filho F
 11     Senão se umax não pertence a F
 12         v <- umax
 13     Senão
-14         L <- P1 - F
-15         u3 <- arg(min(dist(v, L)))
-16         v <- u3
-17     Adiciona(F, v)
-18 Retorna F
+14         u3 <- arg(min(dist(v, (P1 - F))))
+15         v <- u3
+16     Adiciona(F, v)
+17 Retorna F
+
+
+1 P N Existem métodos de primeira e segunda ordem que tiram proveito do fato da função ser derivável e conseguem chegar rapidamente a uma solução. Um problema destes métodos porém, é que eles param ao encontrar o primeiro mínimo local. Outras heurísticas, como simulated annealing por exemplo, podem ser usadas para amenizar esta dificuldade.
+2 P R Como a função de avaliação é não-derivável métodos de primeira e segunda ordem não são aplicáveis. 
+3 P D Caso a função de avaliação apresente muita diferença entre indivíduos próximos no espaço de soluções o algoritmo evolutivo se torna ineficiente.
+4 P D O fato da função de avaliação não estar especificada dificulta determinar se um algoritmo evolutivo seria uma boa abordagem. Além disso, como o espaço de solução é não limitado é muito difícil estimar um tamanho de população adequado para realizar uma boa amostragem do problema.
+5 P R 
+6 P R Um algoritmo evolutivo poderia encontrar boas soluções neste caso desde que usasse técnicas, como a divisão por nichos por exemplo, para encontrar os vários ótimos.
